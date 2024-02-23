@@ -72,5 +72,6 @@ TODO:
     Implement saving PDF
     Implement PDF2txt
     Bonus functions for analysis?
+    Create GitHub repo for Kurt
 ==================================================================
 '''
