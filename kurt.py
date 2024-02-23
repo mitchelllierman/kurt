@@ -74,4 +74,28 @@ TODO:
     Bonus functions for analysis?
     Create GitHub repo for Kurt
 ==================================================================
-'''
+Error detected while processing function <SNR>43_NetrwBrowseChgDir[194]..<SNR>43_NetrwEditFile:
+line    7:
+E325: ATTENTION
+Found a swap file by the name "~/.local/state/nvim/swap//%home%mitch%Projects%Python%Kurt%kurt.py.swp"
+
+          owned by: mitch   dated: Thu Feb 22 00:19:18 2024
+         file name: ~mitch/Projects/Python/Kurt/kurt.py
+          modified: YES
+         user name: mitch   host name: Lux
+        process ID: 7016
+While opening file "/home/mitch/Projects/Python/Kurt/kurt.py"
+             dated: Thu Feb 22 02:22:35 2024
+      NEWER than swap file!
+
+(1) Another program may be editing the same file.  If this is the case,
+    be careful not to end up with two different instances of the same
+    file when making changes.  Quit, or continue with caution.
+(2) An edit session for this file crashed.
+    If this is the case, use ":recover" or "vim -r /home/mitch/Projects/Python/Kurt/kurt.py"
+    to recover the changes (see ":help recovery").
+    If you did this already, delete the swap file "/home/mitch/.local/state/nvim/swap//%home%mitch%Pro
+jects%Python%Kurt%kurt.py.swp"
+    to avoid this message.
+
+Swap file "~/.local/state/nvim/swap//%home%mitch%Projects%Python%Kurt%kurt.py.swp" already exists!'''
