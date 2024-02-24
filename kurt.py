@@ -1,5 +1,6 @@
 # Import Needed Libraries
 
+from datetime import datetime
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -8,7 +9,7 @@ import os
 
 
 # Read in the spreadsheet listing sites
-bf_data = pd.read_excel("Site_assignments.xlsx",)
+bf_data = pd.read_excel('Site_assignments.xlsx')
 
 # Read in Brownfield sites by their ID number
 bf_id = bf_data['BFD#']
@@ -31,7 +32,6 @@ def search_Id(id, count=100):  # Completed
 def extract_Data(search_result):
 
     extracted = {'link': [],
-                 # Ex https://ecm.idem.in.gov/cs/idcplg?IdcService=GET_FILE&dID=4080205&dDocName=63984694&Rendition=web&allowInterrupt=1&noSaveAs=1
                  'date': [],
                  # YYYY_MM_DD -- requires PARSING
                  'program': [],
@@ -45,19 +45,31 @@ def extract_Data(search_result):
     # Find the table
     table = soup.find('table', {'class': 'xuiListTable'})
 
+    if table is None:
+        return 1
+    header_check = 0
     # Extract data from each row
     for row in table.find_all('tr'):
         cells = row.find_all('td')
+
+        if header_check == 0:
+            header_check += 1
+            continue
+
         if len(cells) > 0:
             # Assuming the first column contains links
-            extracted['link'].append(cells[0].find('a')['href'])
+            loc = cells[0].find('a')['href']
+            extracted['link'].append(loc)
             # Assuming the second column contains dates
-            extracted['date'].append(cells[1].text)
-            # Assuming the third column contains programs
-            extracted['program'].append(cells[2].text)
-            # Assuming the fourth column contains document types
-            extracted['doc_type'].append(cells[3].text)
 
+            date_object = datetime.strptime(cells[2].text.strip(), "%m/%d/%Y")
+            formatted_date = date_object.strftime("%Y_%m_%d")
+
+            extracted['date'].append(formatted_date)
+            # Assuming the third column contains programs
+            extracted['program'].append(cells[4].text)
+            # Assuming the fourth column contains document types
+            extracted['doctype'].append(cells[6].text)
     # Page Handling
     return extracted
 
@@ -67,13 +79,20 @@ def save_PDFs(site_name, extracted):
     # Download or Save as PDF
 
     for i, link in enumerate(extracted['link']):
+        print(link)
         pdf = requests.get(link)
+        if pdf.status_code == 200:
+            date = extracted['date'][i]
+            program = extracted['program'][i]
+            doc = extracted['doctype'][i]
 
-        fn = extracted.keys()
-        filename = f'{site_name}/{fn[2][i]}_{site_name}_{fn[3][i]}_{fn[4][i]}.pdf'
+            # Save the PDF
+            fname = f'bf_sites/{site_name}/{date}_{site_name}_{program}_{doc}.pdf'
 
-        with open(filename, 'wb') as file:
-            file.write(pdf.content)
+            with open(fname, 'wb') as file:
+                file.write(pdf.content)
+        else:
+            print(f"Failed to download PDF from {link}")
 
     # Implement saving pdf with this filename here:
     # curl -o downloaded_file.pdf "{fn[1]}"
@@ -81,19 +100,35 @@ def save_PDFs(site_name, extracted):
     # PDF miner
 
 
-for ind, id in enumerate(bf_id):
-    # Requests the data from IDEM digital file cabinet using requests
-    search_result = search_Id(id)
+def kurt_Loop(bf_id):
+    os.mkdir('bf_sites')
 
-    extracted = extract_Data()  # Scrape the results pages.:with expression as target:
-        pass
-    # Get a PD frame with: # Link to PDF, Date of Doc, Program, Doc Type
+    extraction_errors = []
+    try:
+        for ind, id in enumerate(bf_id):
+            # Requests the data from IDEM digital file cabinet using requests
+            search_result = search_Id(id)
 
-    # Needs to be processed with regex
-    site_name = re.sub(r"[<>:\"/\\|?&#*. ]", bf_name[ind], "_")
-    os.mkdir(site_name)
+            # Scrape the results pages.:with expression as target:
+            extracted = extract_Data(search_result)
+            if extracted == 1:
+                extraction_errors.append(id)
+                continue
+            # Get PD frame with: # Link to PDF, Date of Doc, Program, Doc Type
 
-    save_PDFs(site_name, extracted)
+            # Needs to be processed with regex
+            site_name = re.sub(r"[()<>:\"/\\|?&#*. ]",  "_", bf_name[ind],)
+            site_name = re.sub(r"\n*", "", site_name)
+
+            os.mkdir(f'bf_sites/{site_name}')
+
+            save_PDFs(site_name, extracted)
+    finally:
+        print("The following IDs returned no results:")
+        print(extraction_errors)
+
+
+kurt_Loop(bf_id)
 
 '''
 ==================================================================
@@ -108,5 +143,5 @@ TODO:
 DONE:
     Implement requests things ( X )
     Create GitHub repo for Kurt ( X )
-    Implement PDF saving ( X )  
+    Implement PDF saving ( X )
 ================================================================== '''
