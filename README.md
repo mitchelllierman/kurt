@@ -6,7 +6,7 @@ By providing Kurt with the name of a community, the tool will search the Indiana
 ### Getting Started
 The easiest way to use Kurt is to load kurt.ipynb in Google Colab. This approach handles the installation of necessary dependencies and ensures that the data from IDEM's brownfields program is available, saving you the trouble of dealing with package managers and Java updates. Earlier versions of Kurt required Anaconda, tabula-py, and Java to function properly.
 
-### Important Note for Journalists
+### Instructions and an Important Note for Journalists
 If you are a journalist new to Colab, we encourage you to learn more about Jupyter Notebooks. However, rest assured that you can use Kurt effectively without a background in computer science or data journalism. Simply follow these steps:
 
 1. Open Google Colab: Go to [Google Colab](colab.google) and select "New Notebook."
